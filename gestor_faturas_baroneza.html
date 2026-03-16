@@ -1,0 +1,408 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:transparent}
+:root{--green:#004518;--green-light:#1B4332;--green-soft:#e8f0eb}
+.header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1rem}
+.header-title{font-size:18px;font-weight:500;color:var(--color-text-primary)}
+.header-sub{font-size:13px;color:var(--color-text-secondary);margin-top:2px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 1.25rem 1rem}
+.stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.75rem 1rem}
+.stat-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
+.stat-value{font-size:20px;font-weight:500;color:var(--color-text-primary)}
+.stat-value.green{color:#1B4332}
+.stat-value.amber{color:#BA7517}
+.stat-value.red{color:#A32D2D}
+.filter-bar{display:flex;gap:8px;padding:0 1.25rem 1rem;flex-wrap:wrap;align-items:center}
+.filter-btn{font-size:12px;padding:4px 12px;border-radius:20px;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.filter-btn.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-primary)}
+.filter-btn:hover{background:var(--color-background-secondary)}
+.search{font-size:13px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);margin-left:auto;width:180px}
+.table-wrap{overflow-x:auto;padding:0 1.25rem 1.25rem}
+table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+th{font-size:11px;font-weight:500;color:var(--color-text-secondary);text-align:left;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);white-space:nowrap}
+td{padding:8px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:middle;color:var(--color-text-primary)}
+tr:hover td{background:var(--color-background-secondary)}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;white-space:nowrap}
+.badge.pending{background:#FAEEDA;color:#633806}
+.badge.uploaded{background:#EAF3DE;color:#27500A}
+.badge.sent{background:#E6F1FB;color:#0C447C}
+.badge.overdue{background:#FCEBEB;color:#791F1F}
+.day-badge{display:inline-block;font-size:12px;font-weight:500;width:24px;height:24px;line-height:24px;text-align:center;border-radius:50%;background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.day-badge.today{background:#EAF3DE;color:#27500A}
+.day-badge.soon{background:#FAEEDA;color:#633806}
+.day-badge.past{background:#FCEBEB;color:#791F1F}
+.action-btn{font-size:11px;padding:3px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.action-btn:hover{background:var(--color-background-secondary)}
+.action-btn.primary{border-color:#1B4332;color:#1B4332}
+.action-btn.primary:hover{background:#e8f0eb}
+.action-btn.blue{border-color:#185FA5;color:#185FA5}
+.action-btn.blue:hover{background:#E6F1FB}
+.btn-group{display:flex;gap:4px}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:1rem}
+.modal{background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);width:100%;max-width:480px;padding:1.25rem;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:500;margin-bottom:1rem;color:var(--color-text-primary)}
+.form-group{margin-bottom:.75rem}
+.form-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;display:block}
+.form-input{width:100%;font-size:13px;padding:6px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary)}
+.form-input:focus{outline:none;border-color:#1B4332}
+.upload-zone{border:1.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-md);padding:1.5rem;text-align:center;cursor:pointer;transition:all .15s}
+.upload-zone:hover,.upload-zone.drag{border-color:#1B4332;background:#e8f0eb}
+.upload-zone.has-file{border-color:#1B4332;background:#EAF3DE}
+.upload-icon{font-size:24px;margin-bottom:.5rem;display:block}
+.upload-text{font-size:13px;color:var(--color-text-secondary)}
+.upload-filename{font-size:13px;font-weight:500;color:#1B4332;margin-top:.25rem}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;padding-top:1rem;border-top:0.5px solid var(--color-border-tertiary)}
+.btn{font-size:13px;padding:6px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary);cursor:pointer;transition:all .15s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn.confirm{background:#1B4332;color:#fff;border-color:#1B4332}
+.btn.confirm:hover{background:#004518}
+.btn.send-email{background:#185FA5;color:#fff;border-color:#185FA5}
+.btn.send-email:hover{background:#0C447C}
+.validation-msg{font-size:12px;padding:6px 10px;border-radius:var(--border-radius-md);margin-top:.5rem}
+.validation-msg.ok{background:#EAF3DE;color:#27500A}
+.validation-msg.err{background:#FCEBEB;color:#791F1F}
+.validation-msg.warn{background:#FAEEDA;color:#633806}
+.divider{height:0.5px;background:var(--color-border-tertiary);margin:.75rem 0}
+.email-hint{font-size:12px;color:var(--color-text-secondary);margin-top:.5rem;padding:8px;background:var(--color-background-secondary);border-radius:var(--border-radius-md)}
+.currency-brl{color:#1B4332}
+.currency-usd{color:#185FA5}
+.col-nome{width:22%}
+.col-conta{width:13%}
+.col-valor{width:11%}
+.col-dia{width:5%}
+.col-status{width:9%}
+.col-emissao{width:9%}
+.col-venc{width:9%}
+.col-arquivo{width:13%}
+.col-acoes{width:9%}
+</style>
+
+<div id="app"></div>
+
+<script>
+const STORAGE_KEY = 'baroneza_faturas_v2';
+const now = new Date();
+const currentMonth = now.getMonth();
+const currentYear = now.getFullYear();
+const currentDay = now.getDate();
+const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+const FATURAS_BASE = [
+  {id:1,nome:'Vivo Móvel 5 linhas',conta:'453765143',valor:'R$ 219,00',moeda:'BRL',valorNum:219,dia:6,grupo:'Vivo'},
+  {id:2,nome:'Vivo Móvel 105 linhas',conta:'360833957',valor:'R$ 5.142,37',moeda:'BRL',valorNum:5142.37,dia:7,grupo:'Vivo'},
+  {id:3,nome:'Anti DDoS',conta:'433119662',valor:'R$ 3.830,00',moeda:'BRL',valorNum:3830,dia:18,grupo:'Telecom'},
+  {id:4,nome:'Monitora Dados 1Gb',conta:'445060708',valor:'R$ 272,00',moeda:'BRL',valorNum:272,dia:18,grupo:'Telecom'},
+  {id:5,nome:'Monitora Dados 400Mb',conta:'445060714',valor:'R$ 261,00',moeda:'BRL',valorNum:261,dia:18,grupo:'Telecom'},
+  {id:6,nome:'IP Dedicado 1Gb',conta:'445060704',valor:'R$ 24.365,45',moeda:'BRL',valorNum:24365.45,dia:18,grupo:'Telecom'},
+  {id:7,nome:'IP Dedicado 400Mb',conta:'445060710',valor:'R$ 6.140,14',moeda:'BRL',valorNum:6140.14,dia:18,grupo:'Telecom'},
+  {id:8,nome:'Vivo Plataforma Digital (M365)',conta:'TIA-1-01068166',valor:'R$ 11.082,55',moeda:'BRL',valorNum:11082.55,dia:27,grupo:'Vivo'},
+  {id:9,nome:'Vivo Voz Corporativo',conta:'2490-2000',valor:'R$ 5.270,00',moeda:'BRL',valorNum:5270,dia:19,grupo:'Vivo'},
+  {id:10,nome:'Vivo Managed Security (Firewall)',conta:'457640718',valor:'R$ 3.287,65',moeda:'BRL',valorNum:3287.65,dia:6,grupo:'Vivo'},
+  {id:11,nome:'Azure Suporte',conta:'SI 530034434',valor:'R$ 177,67',moeda:'BRL',valorNum:177.67,dia:9,grupo:'Cloud'},
+  {id:12,nome:'Azure Backup',conta:'SI 530034434',valor:'R$ 12.280,07',moeda:'BRL',valorNum:12280.07,dia:9,grupo:'Cloud'},
+  {id:13,nome:'Digital Ocean',conta:'SI 530034357',valor:'$ 734,30',moeda:'USD',valorNum:734.30,dia:1,grupo:'Cloud'},
+  {id:14,nome:'G-Suite',conta:'SI 530034358',valor:'R$ 324,80',moeda:'BRL',valorNum:324.80,dia:1,grupo:'SaaS'},
+  {id:15,nome:'Tenorshare (1)',conta:'SI 530034436',valor:'$ 29,95',moeda:'USD',valorNum:29.95,dia:29,grupo:'SaaS'},
+  {id:16,nome:'Tenorshare (2)',conta:'SI 530034436',valor:'$ 19,95',moeda:'USD',valorNum:19.95,dia:29,grupo:'SaaS'},
+  {id:17,nome:'Trae',conta:'-',valor:'$ 3,00',moeda:'USD',valorNum:3,dia:12,grupo:'SaaS'},
+  {id:18,nome:'Notion',conta:'-',valor:'$ 48,00',moeda:'USD',valorNum:48,dia:12,grupo:'SaaS'},
+  {id:19,nome:'Dyad',conta:'-',valor:'$ 30,00',moeda:'USD',valorNum:30,dia:13,grupo:'SaaS'},
+  {id:20,nome:'SupaBase',conta:'-',valor:'$ 37,57',moeda:'USD',valorNum:37.57,dia:16,grupo:'SaaS'},
+  {id:21,nome:'Claude',conta:'-',valor:'R$ 660,00',moeda:'BRL',valorNum:660,dia:24,grupo:'SaaS'},
+];
+
+function loadState(){
+  try{const s=localStorage.getItem(STORAGE_KEY);return s?JSON.parse(s):{}}catch(e){return{}}
+}
+function saveState(state){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
+
+let state = loadState();
+let filterGrupo = 'Todos';
+let filterStatus = 'Todos';
+let searchTerm = '';
+let modalFatura = null;
+let modalFile = null;
+let modalValidation = null;
+
+function getDayClass(dia){
+  if(dia < currentDay) return 'past';
+  if(dia - currentDay <= 3) return 'soon';
+  if(dia === currentDay) return 'today';
+  return '';
+}
+
+function getStatus(fat){
+  const s = state[fat.id];
+  if(!s) return 'pending';
+  if(s.enviada) return 'sent';
+  if(s.arquivo) return 'uploaded';
+  return 'pending';
+}
+
+function getStatusLabel(st){
+  if(st==='sent') return 'Enviada';
+  if(st==='uploaded') return 'Anexada';
+  return 'Pendente';
+}
+
+function formatDate(d){if(!d)return '-'; const[y,m,day]=d.split('-'); return `${day}/${m}/${y}`}
+
+function validateDates(emissao, vencimento){
+  if(!emissao) return {ok:false,msg:'Informe a data de emissão.'};
+  const em = new Date(emissao+'T12:00:00');
+  const emM = em.getMonth(), emY = em.getFullYear();
+  const prevM = currentMonth === 0 ? 11 : currentMonth-1;
+  const prevY = currentMonth === 0 ? currentYear-1 : currentYear;
+  const isCurrentMonth = emM === currentMonth && emY === currentYear;
+  const isPrevMonth = emM === prevM && emY === prevY;
+  if(!isCurrentMonth && !isPrevMonth){
+    return {ok:false,msg:`⚠ Data de emissão fora do período esperado (${monthNames[prevM]}/${prevY} ou ${monthNames[currentMonth]}/${currentYear}).`};
+  }
+  if(vencimento){
+    const vc = new Date(vencimento+'T12:00:00');
+    if(vc < em) return {ok:false,msg:'Vencimento não pode ser anterior à emissão.'};
+  }
+  if(isCurrentMonth) return {ok:true,msg:`✓ Fatura referente ao mês de ${monthNames[currentMonth]}/${currentYear}. OK!`};
+  return {ok:true,warn:true,msg:`ℹ Fatura de ${monthNames[prevM]}/${prevY} — mês anterior, mas aceita.`};
+}
+
+function openModal(fat){
+  modalFatura = fat;
+  modalFile = null;
+  const s = state[fat.id]||{};
+  render();
+  document.getElementById('inp-emissao').value = s.emissao||'';
+  document.getElementById('inp-vencimento').value = s.vencimento||'';
+  if(s.arquivo) document.getElementById('upload-filename').textContent = s.arquivo;
+  checkValidation();
+}
+
+function closeModal(){modalFatura=null;modalFile=null;modalValidation=null;render()}
+
+function checkValidation(){
+  const em = document.getElementById('inp-emissao')?.value;
+  const vc = document.getElementById('inp-vencimento')?.value;
+  if(!em){modalValidation=null;renderValidation();return}
+  modalValidation = validateDates(em,vc);
+  renderValidation();
+}
+
+function renderValidation(){
+  const el = document.getElementById('validation-area');
+  if(!el) return;
+  if(!modalValidation){el.innerHTML='';return}
+  const cls = modalValidation.ok?(modalValidation.warn?'warn':'ok'):'err';
+  el.innerHTML=`<div class="validation-msg ${cls}">${modalValidation.msg}</div>`;
+}
+
+function saveModal(){
+  const em = document.getElementById('inp-emissao')?.value;
+  const vc = document.getElementById('inp-vencimento')?.value;
+  if(!modalValidation||!modalValidation.ok){alert('Corrija as datas antes de salvar.');return}
+  const cur = state[modalFatura.id]||{};
+  state[modalFatura.id] = {...cur, emissao:em, vencimento:vc};
+  if(modalFile){
+    state[modalFatura.id].arquivo = modalFile.name;
+    state[modalFatura.id]._fileRef = modalFile.name;
+  }
+  saveState(state);
+  closeModal();
+}
+
+function sendEmail(fat){
+  const s = state[fat.id]||{};
+  const mes = monthNames[currentMonth];
+  const subject = encodeURIComponent(`Fatura ${fat.nome} – ${mes}/${currentYear}`);
+  const conta = fat.conta && fat.conta!=='-'?`\nNúmero de conta: ${fat.conta}`:'';
+  const emissao = s.emissao?`\nData de emissão: ${formatDate(s.emissao)}`:'';
+  const venc = s.vencimento?`\nData de vencimento: ${formatDate(s.vencimento)}`:'';
+  const body = encodeURIComponent(`Prezados,\n\nSegue fatura referente a ${fat.nome} – ${mes}/${currentYear}.\n\nValor: ${fat.valor}${conta}${emissao}${venc}\n\nAtenciosamente,\nDepartamento de TI – Quinta da Baroneza`);
+  const mailto = `mailto:nfe@quintadabaroneza.com.br?subject=${subject}&body=${body}`;
+  window.open(mailto,'_blank');
+  state[fat.id] = {...(state[fat.id]||{}), enviada:true};
+  saveState(state);
+  render();
+}
+
+function handleFileSelect(e){
+  const f = e.target.files[0];
+  if(!f) return;
+  modalFile = f;
+  document.getElementById('upload-filename').textContent = f.name;
+  document.getElementById('upload-zone').classList.add('has-file');
+}
+
+function resetFatura(id){
+  if(!confirm('Resetar status desta fatura?')) return;
+  delete state[id];
+  saveState(state);
+  render();
+}
+
+function getFilteredFaturas(){
+  return FATURAS_BASE.filter(f=>{
+    if(filterGrupo!=='Todos' && f.grupo!==filterGrupo) return false;
+    if(filterStatus!=='Todos'){
+      const st = getStatus(f);
+      if(filterStatus==='Pendente' && st!=='pending') return false;
+      if(filterStatus==='Anexada' && st!=='uploaded') return false;
+      if(filterStatus==='Enviada' && st!=='sent') return false;
+    }
+    if(searchTerm && !f.nome.toLowerCase().includes(searchTerm.toLowerCase()) && !f.conta.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    return true;
+  }).sort((a,b)=>a.dia-b.dia);
+}
+
+function render(){
+  const faturas = getFilteredFaturas();
+  const total = FATURAS_BASE.length;
+  const pendentes = FATURAS_BASE.filter(f=>getStatus(f)==='pending').length;
+  const anexadas = FATURAS_BASE.filter(f=>getStatus(f)==='uploaded').length;
+  const enviadas = FATURAS_BASE.filter(f=>getStatus(f)==='sent').length;
+  const grupos = ['Todos',...[...new Set(FATURAS_BASE.map(f=>f.grupo))]];
+
+  document.getElementById('app').innerHTML = `
+  <div class="header">
+    <div>
+      <div class="header-title">Gestão de Faturas — ${monthNames[currentMonth]} ${currentYear}</div>
+      <div class="header-sub">Quinta da Baroneza · Departamento de TI</div>
+    </div>
+    <div style="font-size:12px;color:var(--color-text-secondary)">Hoje: ${String(currentDay).padStart(2,'0')}/${String(currentMonth+1).padStart(2,'0')}/${currentYear}</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Total</div><div class="stat-value">${total}</div></div>
+    <div class="stat"><div class="stat-label">Pendentes</div><div class="stat-value amber">${pendentes}</div></div>
+    <div class="stat"><div class="stat-label">Anexadas</div><div class="stat-value green">${anexadas}</div></div>
+    <div class="stat"><div class="stat-label">Enviadas</div><div class="stat-value" style="color:#185FA5">${enviadas}</div></div>
+  </div>
+
+  <div class="filter-bar">
+    ${grupos.map(g=>`<button class="filter-btn${filterGrupo===g?' active':''}" onclick="setGrupo('${g}')">${g}</button>`).join('')}
+    <span style="width:1px;height:16px;background:var(--color-border-tertiary);margin:0 4px"></span>
+    ${['Todos','Pendente','Anexada','Enviada'].map(s=>`<button class="filter-btn${filterStatus===s?' active':''}" onclick="setStatus('${s}')">${s}</button>`).join('')}
+    <input class="search" placeholder="Buscar fatura..." oninput="doSearch(this.value)" value="${searchTerm}">
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <colgroup>
+        <col class="col-nome"><col class="col-conta"><col class="col-valor"><col class="col-dia">
+        <col class="col-status"><col class="col-emissao"><col class="col-venc">
+        <col class="col-arquivo"><col class="col-acoes">
+      </colgroup>
+      <thead><tr>
+        <th>Fatura</th><th>N. Conta</th><th>Valor</th><th>Dia</th>
+        <th>Status</th><th>Emissão</th><th>Vencimento</th>
+        <th>Arquivo</th><th>Ações</th>
+      </tr></thead>
+      <tbody>
+        ${faturas.map(f=>{
+          const st = getStatus(f);
+          const s = state[f.id]||{};
+          const dc = getDayClass(f.dia);
+          return `<tr>
+            <td style="font-weight:500">${f.nome}</td>
+            <td style="font-size:11px;color:var(--color-text-secondary)">${f.conta}</td>
+            <td class="${f.moeda==='USD'?'currency-usd':'currency-brl'}" style="font-variant-numeric:tabular-nums;font-size:12px">${f.valor}</td>
+            <td><span class="day-badge ${dc}">${f.dia}</span></td>
+            <td><span class="badge ${st}">${getStatusLabel(st)}</span></td>
+            <td style="font-size:12px;color:var(--color-text-secondary)">${formatDate(s.emissao)}</td>
+            <td style="font-size:12px;color:var(--color-text-secondary)">${formatDate(s.vencimento)}</td>
+            <td style="font-size:11px;color:var(--color-text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${s.arquivo||''}">${s.arquivo||'—'}</td>
+            <td>
+              <div class="btn-group">
+                <button class="action-btn primary" onclick="openModal(${f.id})">Anexar</button>
+                ${st==='uploaded'||st==='sent'?`<button class="action-btn blue" onclick="sendEmail(${f.id})">Email</button>`:''}
+                ${st!=='pending'?`<button class="action-btn" onclick="resetFatura(${f.id})" title="Resetar">↺</button>`:''}
+              </div>
+            </td>
+          </tr>`
+        }).join('')}
+      </tbody>
+    </table>
+    ${faturas.length===0?'<div style="text-align:center;padding:2rem;color:var(--color-text-secondary);font-size:13px">Nenhuma fatura encontrada.</div>':''}
+  </div>
+
+  ${modalFatura?renderModal():''}
+  `;
+
+  if(modalFatura){
+    document.getElementById('inp-emissao').addEventListener('change',checkValidation);
+    document.getElementById('inp-vencimento').addEventListener('change',checkValidation);
+    const uz = document.getElementById('upload-zone');
+    uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag')});
+    uz.addEventListener('dragleave',()=>uz.classList.remove('drag'));
+    uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag');const f=e.dataTransfer.files[0];if(f){modalFile=f;document.getElementById('upload-filename').textContent=f.name;uz.classList.add('has-file')}});
+  }
+}
+
+function renderModal(){
+  const f = modalFatura;
+  const s = state[f.id]||{};
+  return `<div class="modal-overlay" onclick="if(event.target.className==='modal-overlay')closeModal()">
+    <div class="modal">
+      <div class="modal-title">Registrar Fatura — ${f.nome}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.75rem">
+        <div style="font-size:12px;color:var(--color-text-secondary)">Valor<br><span style="font-size:14px;font-weight:500;color:var(--color-text-primary)">${f.valor}</span></div>
+        <div style="font-size:12px;color:var(--color-text-secondary)">Dia previsto<br><span style="font-size:14px;font-weight:500;color:var(--color-text-primary)">Dia ${f.dia}</span></div>
+      </div>
+      <div class="divider"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="form-group">
+          <label class="form-label">Data de emissão *</label>
+          <input type="date" class="form-input" id="inp-emissao" value="${s.emissao||''}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data de vencimento</label>
+          <input type="date" class="form-input" id="inp-vencimento" value="${s.vencimento||''}">
+        </div>
+      </div>
+      <div id="validation-area"></div>
+      <div class="divider"></div>
+      <div class="form-group">
+        <label class="form-label">Arquivo da fatura (PDF/imagem)</label>
+        <div class="upload-zone${s.arquivo||modalFile?' has-file':''}" id="upload-zone" onclick="document.getElementById('file-input').click()">
+          <span class="upload-icon">⬆</span>
+          <div class="upload-text">Clique ou arraste o arquivo aqui</div>
+          <div class="upload-filename" id="upload-filename">${s.arquivo||modalFile?.name||''}</div>
+        </div>
+        <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none" onchange="handleFileSelect(event)">
+      </div>
+      ${s.arquivo?`<div class="email-hint">Arquivo registrado: <strong>${s.arquivo}</strong><br>Ao clicar em "Enviar Email", o Outlook abrirá com assunto e corpo preenchidos. Adicione o arquivo manualmente no email.</div>`:''}
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal()">Cancelar</button>
+        <button class="btn confirm" onclick="saveModal()">Salvar</button>
+        ${(s.arquivo||modalFile)?`<button class="btn send-email" onclick="saveAndSend()">Salvar e Enviar Email</button>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+window.setGrupo=g=>{filterGrupo=g;render()}
+window.setStatus=s=>{filterStatus=s;render()}
+window.doSearch=v=>{searchTerm=v;render()}
+window.openModal=id=>{modalFatura=FATURAS_BASE.find(f=>f.id===id);modalFile=null;render();const s=state[id]||{};checkValidation()}
+window.closeModal=closeModal
+window.saveModal=saveModal
+window.sendEmail=id=>{const f=FATURAS_BASE.find(x=>x.id===id);sendEmail(f)}
+window.resetFatura=resetFatura
+window.handleFileSelect=handleFileSelect
+window.saveAndSend=()=>{saveModal();if(modalFatura){sendEmail(modalFatura)}else{const f=FATURAS_BASE.find(x=>x.id===(state.lastSaved));if(f)sendEmail(f)}}
+
+window.saveAndSend=()=>{
+  const em = document.getElementById('inp-emissao')?.value;
+  const vc = document.getElementById('inp-vencimento')?.value;
+  if(!modalValidation||!modalValidation.ok){alert('Corrija as datas antes de enviar.');return}
+  const cur = state[modalFatura.id]||{};
+  state[modalFatura.id] = {...cur,emissao:em,vencimento:vc};
+  if(modalFile) state[modalFatura.id].arquivo = modalFile.name;
+  saveState(state);
+  const fat = modalFatura;
+  closeModal();
+  sendEmail(fat);
+}
+
+render();
+</script>

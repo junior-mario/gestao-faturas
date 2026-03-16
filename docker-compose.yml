@@ -1,0 +1,27 @@
+services:
+  backend:
+    build: ./backend
+    volumes:
+      - uploads:/app/uploads
+      - dbdata:/app/data
+    environment:
+      - DATABASE_URL=sqlite:///./data/faturas.db
+      - UPLOAD_DIR=/app/uploads
+      - PUBLIC_URL=http://localhost
+      - AUTH_USERNAME=admin
+      - AUTH_PASSWORD=admin123
+      - AUTH_SECRET=trocar-essa-chave-em-producao
+      - AUTH_TOKEN_TTL_HOURS=12
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  uploads:
+  dbdata:
