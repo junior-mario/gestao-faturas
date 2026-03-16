@@ -5,6 +5,7 @@ export interface AppConfig {
   public_url: string
   email_subject_template: string
   email_body_template: string
+  email_test_to: string
 }
 
 export interface AuthUser {
@@ -80,11 +81,18 @@ async function request<T>(url: string, options?: RequestOptions): Promise<T> {
 
   if (!res.ok) {
     const text = await res.text()
+    let detail = text
+    try {
+      const parsed = JSON.parse(text) as { detail?: string }
+      if (parsed?.detail) detail = parsed.detail
+    } catch {
+      // keep raw text when response is not JSON
+    }
     if (res.status === 401) {
       emitUnauthorizedEvent()
-      throw new UnauthorizedError(text || 'Nao autenticado')
+      throw new UnauthorizedError(detail || 'Nao autenticado')
     }
-    throw new Error(`API error ${res.status}: ${text}`)
+    throw new Error(`API error ${res.status}: ${detail}`)
   }
 
   if (res.status === 204) {
@@ -216,6 +224,12 @@ export const api = {
 
   markEmailSent(faturaId: number, ano: number, mes: number) {
     return request<import('./types').Monthly>(`/monthly/${faturaId}/email?ano=${ano}&mes=${mes}`, {
+      method: 'POST',
+    })
+  },
+
+  sendHtmlTestEmail(faturaId: number, ano: number, mes: number) {
+    return request<{ ok: boolean; to: string }>(`/monthly/${faturaId}/email-html-test?ano=${ano}&mes=${mes}`, {
       method: 'POST',
     })
   },

@@ -5,13 +5,26 @@ services:
       - uploads:/app/uploads
       - dbdata:/app/data
     environment:
-      - DATABASE_URL=sqlite:///./data/faturas.db
-      - UPLOAD_DIR=/app/uploads
-      - PUBLIC_URL=http://localhost:8080
-      - AUTH_USERNAME=admin
-      - AUTH_PASSWORD=admin123
-      - AUTH_SECRET=trocar-essa-chave-em-producao
-      - AUTH_TOKEN_TTL_HOURS=12
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///./data/faturas.db}
+      - UPLOAD_DIR=${UPLOAD_DIR:-/app/uploads}
+      - PUBLIC_URL=${PUBLIC_URL:-http://localhost:8080}
+      - AUTH_USERNAME=${AUTH_USERNAME:-admin}
+      - AUTH_PASSWORD=${AUTH_PASSWORD:-admin123}
+      - AUTH_SECRET=${AUTH_SECRET:-trocar-essa-chave-em-producao}
+      - AUTH_TOKEN_TTL_HOURS=${AUTH_TOKEN_TTL_HOURS:-12}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - SMTP_STARTTLS=${SMTP_STARTTLS:-true}
+      - SMTP_USE_SSL=${SMTP_USE_SSL:-false}
+      - SMTP_FROM=${SMTP_FROM:-mario.franco@quintadabaroneza.com.br}
+      - SMTP_TEST_TO=${SMTP_TEST_TO:-mario.franco@quintadabaroneza.com.br}
+      - EMAIL_PROVIDER=${EMAIL_PROVIDER:-smtp}
+      - GRAPH_TENANT_ID=${GRAPH_TENANT_ID:-}
+      - GRAPH_CLIENT_ID=${GRAPH_CLIENT_ID:-}
+      - GRAPH_CLIENT_SECRET=${GRAPH_CLIENT_SECRET:-}
+      - GRAPH_SENDER=${GRAPH_SENDER:-}
     ports:
       - "8001:8000"
 

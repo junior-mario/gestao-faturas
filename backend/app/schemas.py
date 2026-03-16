@@ -79,12 +79,14 @@ class AppConfigOut(BaseModel):
     public_url: str
     email_subject_template: str
     email_body_template: str
+    email_test_to: str
 
 
 class AppConfigUpdate(BaseModel):
     public_url: str | None = None
     email_subject_template: str | None = None
     email_body_template: str | None = None
+    email_test_to: str | None = None
 
 
 class AuthLoginIn(BaseModel):

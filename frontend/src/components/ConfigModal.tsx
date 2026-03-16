@@ -15,16 +15,35 @@ function normalizeUrl(value: string): string {
   return value.trim().replace(/\/+$/, '')
 }
 
+function normalizeEmailList(value: string): string {
+  const items = value
+    .split(/[,\n;]+/g)
+    .map((item) => item.trim())
+    .filter(Boolean)
+  return Array.from(new Set(items)).join(', ')
+}
+
+function getInvalidEmails(value: string): string[] {
+  const items = value
+    .split(/[,\n;]+/g)
+    .map((item) => item.trim())
+    .filter(Boolean)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return items.filter((item) => !emailRegex.test(item))
+}
+
 export default function ConfigModal({ onClose, currentUser }: Props) {
   const isAdmin = Boolean(currentUser?.is_admin)
 
   const [publicUrl, setPublicUrl] = useState('')
   const [emailSubjectTemplate, setEmailSubjectTemplate] = useState('')
   const [emailBodyTemplate, setEmailBodyTemplate] = useState('')
+  const [emailTestTo, setEmailTestTo] = useState('')
 
   const [initialPublicUrl, setInitialPublicUrl] = useState('')
   const [initialSubjectTemplate, setInitialSubjectTemplate] = useState('')
   const [initialBodyTemplate, setInitialBodyTemplate] = useState('')
+  const [initialEmailTestTo, setInitialEmailTestTo] = useState('')
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -64,10 +83,12 @@ export default function ConfigModal({ onClose, currentUser }: Props) {
         setPublicUrl(config.public_url)
         setEmailSubjectTemplate(config.email_subject_template)
         setEmailBodyTemplate(config.email_body_template)
+        setEmailTestTo(config.email_test_to)
 
         setInitialPublicUrl(config.public_url)
         setInitialSubjectTemplate(config.email_subject_template)
         setInitialBodyTemplate(config.email_body_template)
+        setInitialEmailTestTo(config.email_test_to)
       } catch {
         if (active) setError('Nao foi possivel carregar as configuracoes.')
       } finally {
@@ -105,7 +126,8 @@ export default function ConfigModal({ onClose, currentUser }: Props) {
     return (
       normalizedPublicUrl !== normalizeUrl(initialPublicUrl) ||
       emailSubjectTemplate !== initialSubjectTemplate ||
-      emailBodyTemplate !== initialBodyTemplate
+      emailBodyTemplate !== initialBodyTemplate ||
+      normalizeEmailList(emailTestTo) !== normalizeEmailList(initialEmailTestTo)
     )
   }, [
     normalizedPublicUrl,
@@ -114,6 +136,8 @@ export default function ConfigModal({ onClose, currentUser }: Props) {
     initialSubjectTemplate,
     emailBodyTemplate,
     initialBodyTemplate,
+    emailTestTo,
+    initialEmailTestTo,
   ])
 
   const validationError = useMemo(() => {
@@ -121,8 +145,11 @@ export default function ConfigModal({ onClose, currentUser }: Props) {
     if (!/^https?:\/\//i.test(normalizedPublicUrl)) return 'A URL base deve comecar com http:// ou https://.'
     if (!emailSubjectTemplate.trim()) return 'Informe o template de assunto.'
     if (!emailBodyTemplate.trim()) return 'Informe o template de corpo do email.'
+    if (!normalizeEmailList(emailTestTo)) return 'Informe pelo menos um email destinatario para teste.'
+    const invalidEmails = getInvalidEmails(emailTestTo)
+    if (invalidEmails.length > 0) return `Email(s) invalido(s): ${invalidEmails.join(', ')}`
     return null
-  }, [normalizedPublicUrl, emailSubjectTemplate, emailBodyTemplate])
+  }, [normalizedPublicUrl, emailSubjectTemplate, emailBodyTemplate, emailTestTo])
 
   function handleOverlayClick(e: React.MouseEvent) {
     if ((e.target as HTMLElement).className.includes('modal-overlay')) onClose()
@@ -142,14 +169,17 @@ export default function ConfigModal({ onClose, currentUser }: Props) {
         public_url: normalizedPublicUrl,
         email_subject_template: emailSubjectTemplate,
         email_body_template: emailBodyTemplate,
+        email_test_to: normalizeEmailList(emailTestTo),
       })
       setPublicUrl(saved.public_url)
       setEmailSubjectTemplate(saved.email_subject_template)
       setEmailBodyTemplate(saved.email_body_template)
+      setEmailTestTo(saved.email_test_to)
 
       setInitialPublicUrl(saved.public_url)
       setInitialSubjectTemplate(saved.email_subject_template)
       setInitialBodyTemplate(saved.email_body_template)
+      setInitialEmailTestTo(saved.email_test_to)
       setSuccess('Configuracoes atualizadas com sucesso.')
     } catch (err) {
       console.error(err)
@@ -269,6 +299,21 @@ export default function ConfigModal({ onClose, currentUser }: Props) {
             onChange={(e) => setPublicUrl(e.target.value)}
             disabled={loading || saving}
           />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Destinatario(s) do teste HTML</label>
+          <textarea
+            className="form-input"
+            style={{ minHeight: '82px', resize: 'vertical' }}
+            placeholder="email1@dominio.com, email2@dominio.com"
+            value={emailTestTo}
+            onChange={(e) => setEmailTestTo(e.target.value)}
+            disabled={loading || saving}
+          />
+          <div className="email-hint" style={{ marginTop: '6px' }}>
+            Aceita um ou mais emails separados por virgula, ponto e virgula ou linha.
+          </div>
         </div>
 
         <div className="divider" />

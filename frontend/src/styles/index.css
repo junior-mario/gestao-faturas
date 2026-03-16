@@ -379,6 +379,30 @@ tbody tr.row-sent:hover td { background: #c8e6c9 !important; }
 .btn.send-email { background: #185FA5; color: #fff; border-color: #185FA5; }
 .btn.send-email:hover { background: #0C447C; }
 
+.error-modal {
+  max-width: 900px;
+}
+
+.error-textarea {
+  width: 100%;
+  min-height: 300px;
+  resize: vertical;
+  border: 0.5px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+  background: #f8faf9;
+  color: var(--text-primary);
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  padding: 10px;
+}
+
+.copy-feedback {
+  margin-right: auto;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
 /* Authentication */
 .auth-shell {
   min-height: 100vh;
