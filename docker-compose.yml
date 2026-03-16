@@ -13,7 +13,7 @@ services:
       - AUTH_SECRET=trocar-essa-chave-em-producao
       - AUTH_TOKEN_TTL_HOURS=12
     ports:
-      - "8000:8000"
+      - "8001:8000"
 
   frontend:
     build: ./frontend
