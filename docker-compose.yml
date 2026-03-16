@@ -7,7 +7,7 @@ services:
     environment:
       - DATABASE_URL=sqlite:///./data/faturas.db
       - UPLOAD_DIR=/app/uploads
-      - PUBLIC_URL=http://localhost
+      - PUBLIC_URL=http://localhost:8080
       - AUTH_USERNAME=admin
       - AUTH_PASSWORD=admin123
       - AUTH_SECRET=trocar-essa-chave-em-producao
@@ -18,7 +18,7 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "80:80"
+      - "8080:80"
     depends_on:
       - backend
 

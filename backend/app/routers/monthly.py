@@ -19,7 +19,7 @@ from app.schemas import (
 )
 
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "uploads")
-DEFAULT_PUBLIC_URL = os.getenv("PUBLIC_URL", "http://localhost").rstrip("/")
+DEFAULT_PUBLIC_URL = os.getenv("PUBLIC_URL", "http://localhost:8080").rstrip("/")
 DEFAULT_EMAIL_SUBJECT_TEMPLATE = "Fatura | {{nome_fatura}} | {{mes_nome}}/{{ano}}"
 DEFAULT_EMAIL_BODY_TEMPLATE = """Prezados,
 
