@@ -728,6 +728,22 @@ def mark_email_sent(
         raise HTTPException(status_code=404, detail="Fatura não encontrada")
 
     record = _get_or_create_monthly(db, fatura_id, ano, mes)
+    subject, text_body, html_body = _build_email_payload(
+        fatura=fatura,
+        monthly_record=record,
+        ano=ano,
+        mes=mes,
+        db=db,
+    )
+    config = _get_app_config(db)
+    recipients = _parse_email_list(config["email_test_to"])
+    _send_email(
+        subject=subject,
+        text_body=text_body,
+        html_body=html_body,
+        to_emails=recipients,
+    )
+
     now = datetime.now(timezone.utc).isoformat()
     record.enviada = True
     record.updated_at = now

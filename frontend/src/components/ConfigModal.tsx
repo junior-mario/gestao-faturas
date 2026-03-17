@@ -145,7 +145,7 @@ export default function ConfigModal({ onClose, currentUser }: Props) {
     if (!/^https?:\/\//i.test(normalizedPublicUrl)) return 'A URL base deve comecar com http:// ou https://.'
     if (!emailSubjectTemplate.trim()) return 'Informe o template de assunto.'
     if (!emailBodyTemplate.trim()) return 'Informe o template de corpo do email.'
-    if (!normalizeEmailList(emailTestTo)) return 'Informe pelo menos um email destinatario para teste.'
+    if (!normalizeEmailList(emailTestTo)) return 'Informe pelo menos um email destinatario para envio.'
     const invalidEmails = getInvalidEmails(emailTestTo)
     if (invalidEmails.length > 0) return `Email(s) invalido(s): ${invalidEmails.join(', ')}`
     return null
@@ -302,7 +302,7 @@ export default function ConfigModal({ onClose, currentUser }: Props) {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Destinatario(s) do teste HTML</label>
+          <label className="form-label">Destinatario(s) dos emails (envio e teste)</label>
           <textarea
             className="form-input"
             style={{ minHeight: '82px', resize: 'vertical' }}
@@ -312,7 +312,7 @@ export default function ConfigModal({ onClose, currentUser }: Props) {
             disabled={loading || saving}
           />
           <div className="email-hint" style={{ marginTop: '6px' }}>
-            Aceita um ou mais emails separados por virgula, ponto e virgula ou linha.
+            Aceita um ou mais emails separados por virgula, ponto e virgula ou linha. Este campo e usado no botao Email e no Teste HTML.
           </div>
         </div>
 

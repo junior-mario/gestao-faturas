@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { api, AuthUser } from './api'
 import { Fatura, Stats, StatusFilter } from './types'
 import Header from './components/Header'
@@ -15,6 +15,7 @@ const MONTH_NAMES = [
 ]
 
 const EMPTY_STATS: Stats = { total: 0, pendentes: 0, anexadas: 0, enviadas: 0 }
+type ThemeMode = 'light' | 'dark'
 
 export default function App() {
   const now = new Date()
@@ -31,6 +32,13 @@ export default function App() {
   const [authReady, setAuthReady] = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
+  const [footerNotice, setFooterNotice] = useState<string | null>(null)
+  const noticeTimerRef = useRef<number | null>(null)
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    const stored = localStorage.getItem('gestao_faturas_theme')
+    if (stored === 'light' || stored === 'dark') return stored
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  })
 
   const clearManagementState = useCallback(() => {
     setConfigOpen(false)
@@ -47,6 +55,17 @@ export default function App() {
     setAuthReady(true)
   }, [clearManagementState])
 
+  const showFooterNotice = useCallback((message: string) => {
+    setFooterNotice(message)
+    if (noticeTimerRef.current) {
+      window.clearTimeout(noticeTimerRef.current)
+    }
+    noticeTimerRef.current = window.setTimeout(() => {
+      setFooterNotice(null)
+      noticeTimerRef.current = null
+    }, 4500)
+  }, [])
+
   useEffect(() => {
     const onUnauthorized = () => {
       api.clearToken()
@@ -59,6 +78,19 @@ export default function App() {
       window.removeEventListener('auth:unauthorized', onUnauthorized)
     }
   }, [clearManagementState])
+
+  useEffect(() => {
+    return () => {
+      if (noticeTimerRef.current) {
+        window.clearTimeout(noticeTimerRef.current)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('gestao_faturas_theme', theme)
+  }, [theme])
 
   useEffect(() => {
     let active = true
@@ -184,6 +216,8 @@ export default function App() {
         onNext={nextMonth}
         onOpenConfig={() => setConfigOpen(true)}
         onLogout={handleLogout}
+        theme={theme}
+        onToggleTheme={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
       />
       <StatsBar stats={stats} />
       <FilterBar
@@ -204,6 +238,7 @@ export default function App() {
           mes={mes}
           onOpenModal={setModalFatura}
           onReload={reload}
+          onNotify={showFooterNotice}
         />
       )}
       {modalFatura && (
@@ -213,6 +248,7 @@ export default function App() {
           mes={mes}
           onClose={() => setModalFatura(null)}
           onSaved={reload}
+          onNotify={showFooterNotice}
         />
       )}
       {configOpen && (
@@ -220,6 +256,11 @@ export default function App() {
           onClose={() => setConfigOpen(false)}
           currentUser={currentUser}
         />
+      )}
+      {footerNotice && (
+        <div className="footer-notice" role="status" aria-live="polite">
+          {footerNotice}
+        </div>
       )}
     </div>
   )

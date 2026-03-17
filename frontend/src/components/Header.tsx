@@ -4,9 +4,11 @@ interface Props {
   onNext: () => void
   onOpenConfig: () => void
   onLogout: () => void
+  theme: 'light' | 'dark'
+  onToggleTheme: () => void
 }
 
-export default function Header({ title, onPrev, onNext, onOpenConfig, onLogout }: Props) {
+export default function Header({ title, onPrev, onNext, onOpenConfig, onLogout, theme, onToggleTheme }: Props) {
   const now = new Date()
   const day = String(now.getDate()).padStart(2, '0')
   const month = String(now.getMonth() + 1).padStart(2, '0')
@@ -19,6 +21,9 @@ export default function Header({ title, onPrev, onNext, onOpenConfig, onLogout }
         <div className="header-sub">Quinta da Baroneza - Departamento de TI</div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <button className="action-btn" onClick={onToggleTheme}>
+          Tema: {theme === 'dark' ? 'Escuro' : 'Claro'}
+        </button>
         <button className="action-btn" onClick={onOpenConfig}>
           Configuracao
         </button>
@@ -29,7 +34,7 @@ export default function Header({ title, onPrev, onNext, onOpenConfig, onLogout }
           <button className="nav-btn" onClick={onPrev}>{'<'}</button>
           <button className="nav-btn" onClick={onNext}>{'>'}</button>
         </div>
-        <div style={{ fontSize: '12px', color: '#666' }}>
+        <div className="header-date">
           Hoje: {day}/{month}/{year}
         </div>
       </div>

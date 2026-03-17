@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Fatura } from '../types'
 import { api } from '../api'
-import { formatDate, MONTH_NAMES } from '../App'
+import { MONTH_NAMES } from '../App'
 import UploadZone from './UploadZone'
-import { buildBillingEmailBody, buildBillingEmailSubject } from '../emailTemplate'
 
 interface Props {
   fatura: Fatura
@@ -11,6 +10,7 @@ interface Props {
   mes: number
   onClose: () => void
   onSaved: () => void
+  onNotify: (message: string) => void
 }
 
 interface Validation {
@@ -19,7 +19,7 @@ interface Validation {
   msg: string
 }
 
-export default function FaturaModal({ fatura, ano, mes, onClose, onSaved }: Props) {
+export default function FaturaModal({ fatura, ano, mes, onClose, onSaved, onNotify }: Props) {
   const m = fatura.monthly
   const [valorOverride, setValorOverride] = useState(m?.valor_override || '')
   const [emissao, setEmissao] = useState(m?.emissao || '')
@@ -87,38 +87,9 @@ export default function FaturaModal({ fatura, ano, mes, onClose, onSaved }: Prop
     setSaving(true)
     try {
       await doSave()
-
-      const mesName = MONTH_NAMES[mes - 1]
-      const valorEmail = valorOverride || fatura.valor
-      const config = await api.getAppConfig()
-
-      let downloadLink: string | null = null
-      const hasFiles = existingFiles.length > 0 || files.length > 0
-      if (hasFiles) {
-        downloadLink = `${config.public_url}${api.downloadPagePath(fatura.id, ano, mes)}`
-      }
-
-      const emailInput = {
-        nome: fatura.nome,
-        mesName,
-        ano,
-        valor: valorEmail,
-        conta: fatura.conta && fatura.conta !== '-' ? fatura.conta : null,
-        emissao: emissao ? formatDate(emissao) : null,
-        vencimento: vencimento ? formatDate(vencimento) : null,
-        downloadLink,
-      }
-      const subject = encodeURIComponent(
-        buildBillingEmailSubject(emailInput, config.email_subject_template),
-      )
-      const fullBody = encodeURIComponent(
-        buildBillingEmailBody(emailInput, config.email_body_template),
-      )
-
-      window.open(`mailto:nfe@quintadabaroneza.com.br?subject=${subject}&body=${fullBody}`, '_blank')
-
       await api.markEmailSent(fatura.id, ano, mes)
       onSaved()
+      onNotify('Email enviado com sucesso.')
       onClose()
     } catch (err) {
       console.error(err)
@@ -202,7 +173,7 @@ export default function FaturaModal({ fatura, ano, mes, onClose, onSaved }: Prop
           <div className="email-hint">
             {existingFiles.length} arquivo(s) registrado(s).
             <br />
-            Ao clicar em "Salvar e Enviar Email", o Outlook abrira com assunto, corpo e links para download das faturas ja preenchidos.
+            Ao clicar em "Salvar e Enviar Email", o sistema envia automaticamente para o(s) destinatario(s) configurado(s).
           </div>
         )}
 

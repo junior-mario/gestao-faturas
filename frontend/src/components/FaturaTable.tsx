@@ -7,9 +7,10 @@ interface Props {
   mes: number
   onOpenModal: (f: Fatura) => void
   onReload: () => void
+  onNotify: (message: string) => void
 }
 
-export default function FaturaTable({ faturas, ano, mes, onOpenModal, onReload }: Props) {
+export default function FaturaTable({ faturas, ano, mes, onOpenModal, onReload, onNotify }: Props) {
   return (
     <div className="table-wrap">
       <table>
@@ -35,6 +36,7 @@ export default function FaturaTable({ faturas, ano, mes, onOpenModal, onReload }
               mes={mes}
               onOpenModal={onOpenModal}
               onReload={onReload}
+              onNotify={onNotify}
             />
           ))}
         </tbody>

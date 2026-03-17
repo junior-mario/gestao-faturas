@@ -2,7 +2,6 @@ import { useRef, useState } from 'react'
 import { Fatura } from '../types'
 import { getStatus, getStatusLabel, formatDate } from '../App'
 import { api } from '../api'
-import { buildBillingEmailBody, buildBillingEmailSubject } from '../emailTemplate'
 
 interface Props {
   fatura: Fatura
@@ -10,14 +9,10 @@ interface Props {
   mes: number
   onOpenModal: (f: Fatura) => void
   onReload: () => void
+  onNotify: (message: string) => void
 }
 
-const MONTH_NAMES = [
-  'Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
-]
-
-export default function FaturaRow({ fatura, ano, mes, onOpenModal, onReload }: Props) {
+export default function FaturaRow({ fatura, ano, mes, onOpenModal, onReload, onNotify }: Props) {
   const st = getStatus(fatura)
   const m = fatura.monthly
   const [errorDialogOpen, setErrorDialogOpen] = useState(false)
@@ -39,37 +34,17 @@ export default function FaturaRow({ fatura, ano, mes, onOpenModal, onReload }: P
   }
 
   async function handleSendEmail() {
-    const mesName = MONTH_NAMES[mes - 1]
-    const valorEmail = m?.valor_override || fatura.valor
-    const config = await api.getAppConfig()
-
-    let downloadLink: string | null = null
-    if (m?.arquivos && m.arquivos.length > 0) {
-      downloadLink = `${config.public_url}${api.downloadPagePath(fatura.id, ano, mes)}`
+    try {
+      await api.markEmailSent(fatura.id, ano, mes)
+      onReload()
+      onNotify('Email enviado com sucesso.')
+    } catch (err) {
+      console.error(err)
+      const message = err instanceof Error ? err.message : String(err)
+      setErrorDialogText(`Erro ao enviar email.\n\n${message}`)
+      setCopyFeedback('')
+      setErrorDialogOpen(true)
     }
-
-    const emailInput = {
-      nome: fatura.nome,
-      mesName,
-      ano,
-      valor: valorEmail,
-      conta: fatura.conta && fatura.conta !== '-' ? fatura.conta : null,
-      emissao: m?.emissao ? formatDate(m.emissao) : null,
-      vencimento: m?.vencimento ? formatDate(m.vencimento) : null,
-      downloadLink,
-    }
-    const subject = encodeURIComponent(
-      buildBillingEmailSubject(emailInput, config.email_subject_template),
-    )
-    const body = encodeURIComponent(
-      buildBillingEmailBody(emailInput, config.email_body_template),
-    )
-
-    const mailto = `mailto:nfe@quintadabaroneza.com.br?subject=${subject}&body=${body}`
-    window.open(mailto, '_blank')
-
-    await api.markEmailSent(fatura.id, ano, mes)
-    onReload()
   }
 
   async function handleSendHtmlTest() {
