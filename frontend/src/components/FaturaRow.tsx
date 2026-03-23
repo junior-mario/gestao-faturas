@@ -15,6 +15,7 @@ interface Props {
 export default function FaturaRow({ fatura, ano, mes, onOpenModal, onReload, onNotify }: Props) {
   const st = getStatus(fatura)
   const m = fatura.monthly
+  const [sendingAction, setSendingAction] = useState<'email' | 'test' | null>(null)
   const [errorDialogOpen, setErrorDialogOpen] = useState(false)
   const [errorDialogText, setErrorDialogText] = useState('')
   const [copyFeedback, setCopyFeedback] = useState('')
@@ -34,6 +35,8 @@ export default function FaturaRow({ fatura, ano, mes, onOpenModal, onReload, onN
   }
 
   async function handleSendEmail() {
+    if (sendingAction) return
+    setSendingAction('email')
     try {
       await api.markEmailSent(fatura.id, ano, mes)
       onReload()
@@ -44,10 +47,14 @@ export default function FaturaRow({ fatura, ano, mes, onOpenModal, onReload, onN
       setErrorDialogText(`Erro ao enviar email.\n\n${message}`)
       setCopyFeedback('')
       setErrorDialogOpen(true)
+    } finally {
+      setSendingAction(null)
     }
   }
 
   async function handleSendHtmlTest() {
+    if (sendingAction) return
+    setSendingAction('test')
     try {
       const res = await api.sendHtmlTestEmail(fatura.id, ano, mes)
       alert(`Email HTML de teste enviado para ${res.to}.`)
@@ -57,6 +64,8 @@ export default function FaturaRow({ fatura, ano, mes, onOpenModal, onReload, onN
       setErrorDialogText(`Erro ao enviar email HTML de teste.\n\n${message}`)
       setCopyFeedback('')
       setErrorDialogOpen(true)
+    } finally {
+      setSendingAction(null)
     }
   }
 
@@ -126,13 +135,13 @@ export default function FaturaRow({ fatura, ano, mes, onOpenModal, onReload, onN
               Anexar
             </button>
             {(st === 'uploaded' || st === 'sent') && (
-              <button className="action-btn blue" onClick={handleSendEmail}>
-                Email
+              <button className="action-btn blue" onClick={handleSendEmail} disabled={sendingAction !== null}>
+                {sendingAction === 'email' ? 'Enviando...' : 'Email'}
               </button>
             )}
             {(st === 'uploaded' || st === 'sent') && (
-              <button className="action-btn" onClick={handleSendHtmlTest}>
-                Teste HTML
+              <button className="action-btn" onClick={handleSendHtmlTest} disabled={sendingAction !== null}>
+                {sendingAction === 'test' ? 'Enviando...' : 'Teste HTML'}
               </button>
             )}
             {st !== 'pending' && (
