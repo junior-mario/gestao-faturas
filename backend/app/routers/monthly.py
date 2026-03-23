@@ -325,6 +325,33 @@ def _build_email_payload(
     return subject, text_body, html_body
 
 
+def _send_monthly_email_payload(
+    fatura: Fatura,
+    monthly_record: FaturaMonthly | None,
+    ano: int,
+    mes: int,
+    db: Session,
+    subject_prefix: str = "",
+) -> list[str]:
+    subject, text_body, html_body = _build_email_payload(
+        fatura=fatura,
+        monthly_record=monthly_record,
+        ano=ano,
+        mes=mes,
+        db=db,
+    )
+    config = _get_app_config(db)
+    recipients = _parse_email_list(config["email_test_to"])
+    final_subject = f"{subject_prefix}{subject}" if subject_prefix else subject
+    _send_email(
+        subject=final_subject,
+        text_body=text_body,
+        html_body=html_body,
+        to_emails=recipients,
+    )
+    return recipients
+
+
 def _send_smtp_email(
     subject: str,
     text_body: str,
@@ -728,20 +755,12 @@ def mark_email_sent(
         raise HTTPException(status_code=404, detail="Fatura não encontrada")
 
     record = _get_or_create_monthly(db, fatura_id, ano, mes)
-    subject, text_body, html_body = _build_email_payload(
+    _send_monthly_email_payload(
         fatura=fatura,
         monthly_record=record,
         ano=ano,
         mes=mes,
         db=db,
-    )
-    config = _get_app_config(db)
-    recipients = _parse_email_list(config["email_test_to"])
-    _send_email(
-        subject=subject,
-        text_body=text_body,
-        html_body=html_body,
-        to_emails=recipients,
     )
 
     now = datetime.now(timezone.utc).isoformat()
@@ -775,20 +794,13 @@ def send_html_test_email(
         .first()
     )
 
-    subject, text_body, html_body = _build_email_payload(
+    test_recipients = _send_monthly_email_payload(
         fatura=fatura,
         monthly_record=record,
         ano=ano,
         mes=mes,
         db=db,
-    )
-    config = _get_app_config(db)
-    test_recipients = _parse_email_list(config["email_test_to"])
-    _send_email(
-        subject=f"[TESTE HTML] {subject}",
-        text_body=text_body,
-        html_body=html_body,
-        to_emails=test_recipients,
+        subject_prefix="[TESTE HTML] ",
     )
     return {"ok": True, "to": ", ".join(test_recipients)}
 
