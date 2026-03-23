@@ -31,8 +31,16 @@ export default function Header({ title, onPrev, onNext, onOpenConfig, onLogout, 
           Sair
         </button>
         <div className="month-nav">
-          <button className="nav-btn" onClick={onPrev}>{'<'}</button>
-          <button className="nav-btn" onClick={onNext}>{'>'}</button>
+          <button className="nav-btn" onClick={onPrev} aria-label="Mes anterior" title="Mes anterior">
+            <svg className="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M15 6l-6 6 6 6" />
+            </svg>
+          </button>
+          <button className="nav-btn" onClick={onNext} aria-label="Proximo mes" title="Proximo mes">
+            <svg className="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+          </button>
         </div>
         <div className="header-date">
           Hoje: {day}/{month}/{year}

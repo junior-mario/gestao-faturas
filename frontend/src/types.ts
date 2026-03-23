@@ -34,5 +34,5 @@ export interface Stats {
   enviadas: number
 }
 
-export type StatusFilter = 'Todos' | 'Pendente' | 'Anexada' | 'Enviada'
+export type StatusFilter = 'Todos' | 'Faltam Enviar' | 'Pendente' | 'Anexada' | 'Enviada'
 export type FaturaStatus = 'pending' | 'uploaded' | 'sent'

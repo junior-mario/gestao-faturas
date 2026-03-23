@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function FilterBar({ grupos, filterGrupo, filterStatus, search, onGrupo, onStatus, onSearch }: Props) {
-  const statuses: StatusFilter[] = ['Todos', 'Pendente', 'Anexada', 'Enviada']
+  const statuses: StatusFilter[] = ['Todos', 'Faltam Enviar', 'Pendente', 'Anexada', 'Enviada']
 
   return (
     <div className="filter-bar">

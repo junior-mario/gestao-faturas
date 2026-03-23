@@ -157,6 +157,7 @@ export default function App() {
     if (filterGrupo !== 'Todos' && f.grupo !== filterGrupo) return false
     if (filterStatus !== 'Todos') {
       const st = getStatus(f)
+      if (filterStatus === 'Faltam Enviar' && st === 'sent') return false
       if (filterStatus === 'Pendente' && st !== 'pending') return false
       if (filterStatus === 'Anexada' && st !== 'uploaded') return false
       if (filterStatus === 'Enviada' && st !== 'sent') return false
