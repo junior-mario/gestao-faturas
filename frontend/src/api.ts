@@ -21,6 +21,29 @@ export interface UserItem {
   created_at: string
 }
 
+export interface FaturaCreatePayload {
+  nome: string
+  conta: string
+  valor: string
+  moeda: string
+  valor_num: number
+  dia: number
+  grupo: string
+}
+
+interface FaturaApiItem {
+  id: number
+  nome: string
+  conta: string
+  valor: string
+  moeda: string
+  valor_num: number
+  dia: number
+  grupo: string
+  ativo: boolean
+  created_at: string
+}
+
 let _appConfig: AppConfig | null = null
 
 class UnauthorizedError extends Error {
@@ -196,6 +219,14 @@ export const api = {
   updateAppConfig,
   getPublicUrl,
   updatePublicUrl,
+
+  createFatura(payload: FaturaCreatePayload) {
+    return request<FaturaApiItem>('/faturas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+  },
 
   getMonthly(ano: number, mes: number) {
     return request<import('./types').Fatura[]>(`/monthly?ano=${ano}&mes=${mes}`)

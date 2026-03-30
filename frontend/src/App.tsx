@@ -6,6 +6,7 @@ import StatsBar from './components/StatsBar'
 import FilterBar from './components/FilterBar'
 import FaturaTable from './components/FaturaTable'
 import FaturaModal from './components/FaturaModal'
+import AddFaturaModal from './components/AddFaturaModal'
 import ConfigModal from './components/ConfigModal'
 import LoginForm from './components/LoginForm'
 
@@ -27,6 +28,7 @@ export default function App() {
   const [filterStatus, setFilterStatus] = useState<StatusFilter>('Todos')
   const [search, setSearch] = useState('')
   const [modalFatura, setModalFatura] = useState<Fatura | null>(null)
+  const [addFaturaOpen, setAddFaturaOpen] = useState(false)
   const [configOpen, setConfigOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [authReady, setAuthReady] = useState(false)
@@ -43,6 +45,7 @@ export default function App() {
   const clearManagementState = useCallback(() => {
     setConfigOpen(false)
     setModalFatura(null)
+    setAddFaturaOpen(false)
     setFaturas([])
     setStats(EMPTY_STATS)
     setCurrentUser(null)
@@ -215,6 +218,7 @@ export default function App() {
         title={`Gestao de Faturas - ${MONTH_NAMES[mes - 1]} ${ano}`}
         onPrev={prevMonth}
         onNext={nextMonth}
+        onOpenAddFatura={() => setAddFaturaOpen(true)}
         onOpenConfig={() => setConfigOpen(true)}
         onLogout={handleLogout}
         theme={theme}
@@ -250,6 +254,17 @@ export default function App() {
           onClose={() => setModalFatura(null)}
           onSaved={reload}
           onNotify={showFooterNotice}
+        />
+      )}
+      {addFaturaOpen && (
+        <AddFaturaModal
+          onClose={() => setAddFaturaOpen(false)}
+          onCreated={async (nomeFatura) => {
+            setAddFaturaOpen(false)
+            setLoading(true)
+            await reload()
+            showFooterNotice(`Fatura "${nomeFatura}" criada com sucesso.`)
+          }}
         />
       )}
       {configOpen && (

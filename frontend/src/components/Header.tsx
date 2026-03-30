@@ -2,13 +2,14 @@ interface Props {
   title: string
   onPrev: () => void
   onNext: () => void
+  onOpenAddFatura: () => void
   onOpenConfig: () => void
   onLogout: () => void
   theme: 'light' | 'dark'
   onToggleTheme: () => void
 }
 
-export default function Header({ title, onPrev, onNext, onOpenConfig, onLogout, theme, onToggleTheme }: Props) {
+export default function Header({ title, onPrev, onNext, onOpenAddFatura, onOpenConfig, onLogout, theme, onToggleTheme }: Props) {
   const now = new Date()
   const day = String(now.getDate()).padStart(2, '0')
   const month = String(now.getMonth() + 1).padStart(2, '0')
@@ -23,6 +24,9 @@ export default function Header({ title, onPrev, onNext, onOpenConfig, onLogout, 
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
         <button className="action-btn" onClick={onToggleTheme}>
           Tema: {theme === 'dark' ? 'Escuro' : 'Claro'}
+        </button>
+        <button className="action-btn primary" onClick={onOpenAddFatura}>
+          Nova fatura
         </button>
         <button className="action-btn" onClick={onOpenConfig}>
           Configuracao
