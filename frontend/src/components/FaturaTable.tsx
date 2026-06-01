@@ -5,12 +5,13 @@ interface Props {
   faturas: Fatura[]
   ano: number
   mes: number
+  onOpenEditModal: (f: Fatura) => void
   onOpenModal: (f: Fatura) => void
   onReload: () => void
   onNotify: (message: string) => void
 }
 
-export default function FaturaTable({ faturas, ano, mes, onOpenModal, onReload, onNotify }: Props) {
+export default function FaturaTable({ faturas, ano, mes, onOpenEditModal, onOpenModal, onReload, onNotify }: Props) {
   return (
     <div className="table-wrap">
       <table>
@@ -34,6 +35,7 @@ export default function FaturaTable({ faturas, ano, mes, onOpenModal, onReload, 
               fatura={f}
               ano={ano}
               mes={mes}
+              onOpenEditModal={onOpenEditModal}
               onOpenModal={onOpenModal}
               onReload={onReload}
               onNotify={onNotify}

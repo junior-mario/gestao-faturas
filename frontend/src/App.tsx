@@ -7,6 +7,7 @@ import FilterBar from './components/FilterBar'
 import FaturaTable from './components/FaturaTable'
 import FaturaModal from './components/FaturaModal'
 import AddFaturaModal from './components/AddFaturaModal'
+import EditFaturaModal from './components/EditFaturaModal'
 import ConfigModal from './components/ConfigModal'
 import LoginForm from './components/LoginForm'
 
@@ -28,6 +29,7 @@ export default function App() {
   const [filterStatus, setFilterStatus] = useState<StatusFilter>('Todos')
   const [search, setSearch] = useState('')
   const [modalFatura, setModalFatura] = useState<Fatura | null>(null)
+  const [editFatura, setEditFatura] = useState<Fatura | null>(null)
   const [addFaturaOpen, setAddFaturaOpen] = useState(false)
   const [configOpen, setConfigOpen] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -45,6 +47,7 @@ export default function App() {
   const clearManagementState = useCallback(() => {
     setConfigOpen(false)
     setModalFatura(null)
+    setEditFatura(null)
     setAddFaturaOpen(false)
     setFaturas([])
     setStats(EMPTY_STATS)
@@ -241,6 +244,7 @@ export default function App() {
           faturas={filtered}
           ano={ano}
           mes={mes}
+          onOpenEditModal={setEditFatura}
           onOpenModal={setModalFatura}
           onReload={reload}
           onNotify={showFooterNotice}
@@ -264,6 +268,18 @@ export default function App() {
             setLoading(true)
             await reload()
             showFooterNotice(`Fatura "${nomeFatura}" criada com sucesso.`)
+          }}
+        />
+      )}
+      {editFatura && (
+        <EditFaturaModal
+          fatura={editFatura}
+          onClose={() => setEditFatura(null)}
+          onSaved={async (nomeFatura) => {
+            setEditFatura(null)
+            setLoading(true)
+            await reload()
+            showFooterNotice(`Fatura "${nomeFatura}" atualizada com sucesso.`)
           }}
         />
       )}

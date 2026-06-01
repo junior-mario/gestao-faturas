@@ -228,6 +228,20 @@ export const api = {
     })
   },
 
+  updateFatura(faturaId: number, payload: Partial<FaturaCreatePayload>) {
+    return request<FaturaApiItem>(`/faturas/${faturaId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+  },
+
+  deleteFatura(faturaId: number) {
+    return request<{ ok: boolean }>(`/faturas/${faturaId}`, {
+      method: 'DELETE',
+    })
+  },
+
   getMonthly(ano: number, mes: number) {
     return request<import('./types').Fatura[]>(`/monthly?ano=${ano}&mes=${mes}`)
   },

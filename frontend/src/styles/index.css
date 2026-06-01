@@ -287,6 +287,8 @@ tbody tr.row-sent:hover td { background: var(--row-sent-hover) !important; }
 .action-btn.primary:hover { background: var(--primary-hover-bg); }
 .action-btn.blue { border-color: #185FA5; color: #185FA5; }
 .action-btn.blue:hover { background: var(--blue-hover-bg); }
+.action-btn.danger { border-color: #9D2F2F; color: #9D2F2F; }
+.action-btn.danger:hover { background: #FBEAEA; }
 .btn-group { display: flex; gap: 4px; flex-wrap: nowrap; }
 
 /* Modal */

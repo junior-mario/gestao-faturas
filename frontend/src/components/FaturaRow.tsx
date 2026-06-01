@@ -7,19 +7,22 @@ interface Props {
   fatura: Fatura
   ano: number
   mes: number
+  onOpenEditModal: (f: Fatura) => void
   onOpenModal: (f: Fatura) => void
   onReload: () => void
   onNotify: (message: string) => void
 }
 
-export default function FaturaRow({ fatura, ano, mes, onOpenModal, onReload, onNotify }: Props) {
+export default function FaturaRow({ fatura, ano, mes, onOpenEditModal, onOpenModal, onReload, onNotify }: Props) {
   const st = getStatus(fatura)
   const m = fatura.monthly
   const [sendingAction, setSendingAction] = useState<'email' | 'test' | null>(null)
+  const [deleting, setDeleting] = useState(false)
   const [errorDialogOpen, setErrorDialogOpen] = useState(false)
   const [errorDialogText, setErrorDialogText] = useState('')
   const [copyFeedback, setCopyFeedback] = useState('')
   const errorTextRef = useRef<HTMLTextAreaElement | null>(null)
+  const actionBusy = sendingAction !== null || deleting
 
   const now = new Date()
   const currentDay = now.getDate()
@@ -98,6 +101,23 @@ export default function FaturaRow({ fatura, ano, mes, onOpenModal, onReload, onN
     onReload()
   }
 
+  async function handleDelete() {
+    if (actionBusy) return
+    if (!confirm(`Apagar a fatura "${fatura.nome}"?`)) return
+
+    setDeleting(true)
+    try {
+      await api.deleteFatura(fatura.id)
+      onReload()
+      onNotify('Fatura apagada com sucesso.')
+    } catch (err) {
+      console.error(err)
+      alert('Erro ao apagar fatura.')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   return (
     <>
       <tr className={st === 'sent' ? 'row-sent' : ''}>
@@ -131,24 +151,30 @@ export default function FaturaRow({ fatura, ano, mes, onOpenModal, onReload, onN
         </td>
         <td>
           <div className="btn-group">
-            <button className="action-btn primary" onClick={() => onOpenModal(fatura)}>
+            <button className="action-btn" onClick={() => onOpenEditModal(fatura)} disabled={actionBusy}>
+              Editar
+            </button>
+            <button className="action-btn primary" onClick={() => onOpenModal(fatura)} disabled={actionBusy}>
               Anexar
             </button>
             {(st === 'uploaded' || st === 'sent') && (
-              <button className="action-btn blue" onClick={handleSendEmail} disabled={sendingAction !== null}>
+              <button className="action-btn blue" onClick={handleSendEmail} disabled={actionBusy}>
                 {sendingAction === 'email' ? 'Enviando...' : 'Email'}
               </button>
             )}
             {(st === 'uploaded' || st === 'sent') && (
-              <button className="action-btn" onClick={handleSendHtmlTest} disabled={sendingAction !== null}>
+              <button className="action-btn" onClick={handleSendHtmlTest} disabled={actionBusy}>
                 {sendingAction === 'test' ? 'Enviando...' : 'Teste HTML'}
               </button>
             )}
             {st !== 'pending' && (
-              <button className="action-btn" onClick={handleReset} title="Resetar">
+              <button className="action-btn" onClick={handleReset} title="Resetar" disabled={actionBusy}>
                 Reset
               </button>
             )}
+            <button className="action-btn danger" onClick={handleDelete} disabled={actionBusy}>
+              {deleting ? 'Apagando...' : 'Apagar'}
+            </button>
           </div>
         </td>
       </tr>
